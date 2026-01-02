@@ -68,7 +68,7 @@ onMounted(() => {
               <td>{{ thesis.author }}</td>
               <td>{{ thesis.year }}</td>
               <td>
-                <a :href="thesis.file_url" target="_blank" rel="noopener noreferrer">
+                <a :href="thesis.file_path" target="_blank" rel="noopener noreferrer">
                   <button class="view-btn">View PDF</button>
                 </a>
               </td>

@@ -1,0 +1,32 @@
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+.env
+.env.backup
+.env.production
+.env.testing
+.phpactor.json
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+*.log
+.DS_Store
+Thumbs.db
+
+# --- Ignore Uploaded Files ---
+# Prevent committing the actual PDF files, but keep the folder structure
+/storage/app/public/thesis-files/*
+!/storage/app/public/thesis-files/.gitignore

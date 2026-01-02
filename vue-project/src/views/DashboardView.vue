@@ -1,26 +1,24 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { supabase } from '../supabase';
+import api from '../api'; // Import your new axios instance
+
 
 const router = useRouter();
 const theses = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref('');
 
+
 const fetchTheses = async () => {
   isLoading.value = true;
   try {
-    const { data, error } = await supabase
-      .from('archives')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    theses.value = data || [];
+    // Call Laravel API
+    const response = await api.get('/archives'); 
+    theses.value = response.data; // Laravel returns array directly
   } catch (err) {
-    console.error('Error:', err.message);
-    errorMessage.value = err.message;
+    console.error('Error:', err);
+    errorMessage.value = "Failed to load data";
   } finally {
     isLoading.value = false;
   }

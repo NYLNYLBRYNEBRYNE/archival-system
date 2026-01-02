@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { supabase } from '../supabase';
+import api from '../api'; // Import the Axios client we created earlier
 
 const router = useRouter();
 
@@ -13,7 +13,6 @@ const isUploading = ref(false);
 
 const handleFileChange = (event) => {
   file.value = event.target.files[0];
-  console.log("File selected:", file.value); // Debug log
 };
 
 const handleUpload = async () => {
@@ -21,56 +20,32 @@ const handleUpload = async () => {
   if (!title.value || !author.value) return alert("Please fill in all fields.");
 
   isUploading.value = true;
-  console.log("Starting upload process...");
+
+  // --- NEW LARAVEL LOGIC ---
+  // We use FormData to send text fields AND the file in one request
+  const formData = new FormData();
+  formData.append('title', title.value);
+  formData.append('author', author.value);
+  formData.append('year', year.value);
+  formData.append('file', file.value); // The actual PDF object
 
   try {
-    // --- STEP 1: UPLOAD TO STORAGE ---
-    const fileName = `${Date.now()}_${file.value.name.replace(/\s+/g, '_')}`; // Clean filename
-    console.log("Attempting to upload file:", fileName);
+    // Send POST request to Laravel (http://localhost:8000/api/archives)
+    const response = await api.post('/archives', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data' // Critical for file uploads!
+      }
+    });
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('thesis-files') // Make sure this Bucket exists in Supabase!
-      .upload(fileName, file.value);
-
-    if (uploadError) {
-      console.error("Storage Error:", uploadError);
-      throw new Error("Storage Upload Failed: " + uploadError.message);
-    }
-    console.log("File uploaded successfully:", uploadData);
-
-    // --- STEP 2: GET PUBLIC URL ---
-    const { data: urlData } = supabase.storage
-      .from('thesis-files')
-      .getPublicUrl(fileName);
-
-    const publicUrl = urlData.publicUrl;
-    console.log("Public URL generated:", publicUrl);
-
-    // --- STEP 3: SAVE TO DATABASE ---
-    console.log("Saving metadata to database...");
-    const { error: dbError } = await supabase
-      .from('archives') // Make sure this Table exists!
-      .insert([
-        {
-          title: title.value,
-          author: author.value,
-          year: year.value,
-          file_url: publicUrl
-        }
-      ]);
-
-    if (dbError) {
-      console.error("Database Error:", dbError);
-      throw new Error("Database Insert Failed: " + dbError.message);
-    }
-
-    console.log("Success! Redirecting...");
+    console.log("Upload success:", response.data);
     alert("Thesis Uploaded Successfully!");
     router.push('/dashboard');
 
   } catch (err) {
-    console.error("CRITICAL FAILURE:", err);
-    alert(err.message);
+    console.error("Upload failed:", err);
+    // Display the error message from Laravel if available
+    const msg = err.response?.data?.message || err.message;
+    alert("Upload Failed: " + msg);
   } finally {
     isUploading.value = false;
   }
@@ -115,6 +90,7 @@ const handleUpload = async () => {
 </template>
 
 <style scoped>
+/* Your styles remain exactly the same as before */
 .upload-container {
   display: flex;
   justify-content: center;

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('archives', function (Blueprint $table) {
@@ -16,14 +13,11 @@ return new class extends Migration
             $table->string('title');
             $table->string('author');
             $table->integer('year');
-            $table->string('file_path'); // Stores the path to the PDF
+            $table->string('file_path'); // Stores the full URL
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('archives');

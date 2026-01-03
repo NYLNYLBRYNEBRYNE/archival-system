@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ArchiveController;
+use App\Http\Controllers\Api\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -10,5 +11,10 @@ use App\Http\Controllers\Api\ArchiveController;
 |--------------------------------------------------------------------------
 */
 
+// Authentication Routes
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// Archive Routes
 Route::get('/archives', [ArchiveController::class, 'index']);
-Route::post('/archives', [ArchiveController::class, 'store']); // This handles the upload
+Route::post('/archives', [ArchiveController::class, 'store']);

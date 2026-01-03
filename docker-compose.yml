@@ -1,0 +1,77 @@
+services:
+  # --- Backend Service ---
+  backend:
+    build:
+      context: ./thesis-backend
+      dockerfile: Dockerfile
+    container_name: thesis_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: thesis_db
+      DB_USERNAME: thesis_user
+      DB_PASSWORD: thesis_password
+    volumes:
+      - ./thesis-backend:/var/www
+    depends_on:
+      - db
+    networks:
+      - thesis-network
+
+  # --- Frontend Service ---
+  frontend:
+    build:
+      context: ./vue-project
+      dockerfile: Dockerfile
+    container_name: thesis_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./vue-project:/app
+      - /app/node_modules
+    networks:
+      - thesis-network
+
+  # --- Database Service ---
+  db:
+    image: mysql:8.0
+    container_name: thesis_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: thesis_db
+      MYSQL_USER: thesis_user
+      MYSQL_PASSWORD: thesis_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - thesis-network
+
+  # --- Database Management (Optional: phpMyAdmin) ---
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: thesis_pma
+    environment:
+      PMA_HOST: db
+      PMA_USER: thesis_user
+      PMA_PASSWORD: thesis_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - thesis-network
+
+volumes:
+  db_data:
+
+networks:
+  thesis-network:
+    driver: bridge
